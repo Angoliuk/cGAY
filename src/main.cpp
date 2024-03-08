@@ -129,6 +129,7 @@
 
 #include <AppCore/Platform.h>
 #include <SDL_error.h>
+#include <SDL_pixels.h>
 #include <SDL_render.h>
 #include <SDL_surface.h>
 #include <Ultralight/Ultralight.h>
@@ -204,7 +205,7 @@ SDL_Texture *CopyBitmapToTexture(UL::RefPtr<UL::Bitmap> bitmap) {
   // Determine the SDL pixel format based on the Ultralight bitmap's format
   Uint32 sdlPixelFormat;
   if (bitmap->format() == UL::BitmapFormat::BGRA8_UNORM_SRGB) {
-    sdlPixelFormat = SDL_PIXELFORMAT_BGRA8888;
+    sdlPixelFormat = SDL_PIXELFORMAT_BGRA32;
   } else {
     // Handle other formats as needed
     return nullptr; // Unsupported format
@@ -229,6 +230,9 @@ SDL_Texture *CopyBitmapToTexture(UL::RefPtr<UL::Bitmap> bitmap) {
   bitmap->UnlockPixels();
 
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer->renderer, surface);
+
+  SDL_FreeSurface(surface);
+
   return texture;
 }
 
@@ -261,14 +265,17 @@ void RenderOneFrame() {
   // std::cout << 2;
 
   if (!surface->dirty_bounds().IsEmpty()) {
-    // std::cout << 1;
     ///
     /// Psuedo-code to upload Surface's bitmap to GPU texture.
     ///
 
+    if (texture) {
+      SDL_DestroyTexture(texture);
+    }
+
     texture = CopyBitmapToTexture(surface->bitmap());
 
-    // SDL_DestroyTexture(texture);
+    //
     ///
     /// Clear the dirty bounds.
     ///
@@ -299,8 +306,6 @@ int main() {
     UpdateLogic();
     RenderOneFrame();
     renderer->update();
-
-    SDL_Delay(100);
   }
 
   delete window;
