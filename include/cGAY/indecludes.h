@@ -1,0 +1,15 @@
+#pragma once
+#include <SDL.h>
+#include <SDL_events.h>
+#include <SDL_rect.h>
+#include <SDL_render.h>
+#include <SDL_surface.h>
+#include <SDL_timer.h>
+#include <SDL_video.h>
+#include <algorithm>
+#include <cstdlib>
+#include <fmt/core.h>
+#include <iostream>
+#include <map>
+#include <utility>
+#include <vector>

@@ -1,0 +1,17 @@
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 2
+UseTab: Never
+
+AlignOperands: true
+BreakBeforeBraces: Attach
+
+AccessModifierOffset: -2
+IndentAccessModifiers: false
+
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortBlocksOnASingleLine: Never
+
+ColumnLimit: 140
