@@ -4,6 +4,6 @@
         "conan": {}
     },
     "include": [
-        "/Users/stasangoliuk/Desktop/cGAY/build/Release/generators/CMakePresets.json"
+        "/home/neutrinozh/cGay/cGAY/build/Release/generators/CMakePresets.json"
     ]
 }

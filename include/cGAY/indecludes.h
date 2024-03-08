@@ -8,7 +8,6 @@
 #include <SDL_video.h>
 #include <algorithm>
 #include <cstdlib>
-#include <fmt/core.h>
 #include <iostream>
 #include <map>
 #include <utility>

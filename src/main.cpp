@@ -1,3 +1,4 @@
+#include "Ultralight/Bitmap.h"
 #include "cGAY/renderer.h"
 #include "cGAY/resources.h"
 #include "cGAY/window.h"
@@ -127,6 +128,7 @@
 // }
 
 #include <AppCore/Platform.h>
+#include <SDL_error.h>
 #include <SDL_render.h>
 #include <SDL_surface.h>
 #include <Ultralight/Ultralight.h>
@@ -172,7 +174,7 @@ void CreateView() {
   ///
   /// Load a raw string of HTML asynchronously into the View.
   ///
-  view->LoadHTML("<h1>Hello World!</h1>");
+  view->LoadURL("file:///page.html");
 }
 
 void InitPlatform() {
@@ -195,50 +197,38 @@ void InitPlatform() {
 
 void Init() {
   UL::Config config;
-
-  ///
-  /// Let's set some custom global CSS to make our background
-  /// purple by default.
-  ///
-  config.user_stylesheet = "body { background: purple; }";
-
-  ///
-  /// Pass our configuration to the Platform singleton so that
-  /// the library can use it.
-  ///
   UL::Platform::instance().set_config(config);
 }
 
 SDL_Texture *CopyBitmapToTexture(UL::RefPtr<UL::Bitmap> bitmap) {
-  ///
-  /// Lock the Bitmap to retrieve the raw pixels.
-  /// The format is BGRA, 8-bpp, premultiplied alpha.
-  ///
-  void *pixels = bitmap->LockPixels();
+  // Determine the SDL pixel format based on the Ultralight bitmap's format
+  Uint32 sdlPixelFormat;
+  if (bitmap->format() == UL::BitmapFormat::BGRA8_UNORM_SRGB) {
+    sdlPixelFormat = SDL_PIXELFORMAT_BGRA8888;
+  } else {
+    // Handle other formats as needed
+    return nullptr; // Unsupported format
+  }
 
-  ///
-  /// Get the bitmap dimensions.
-  ///
-  uint32_t width = bitmap->width();
-  uint32_t height = bitmap->height();
-  uint32_t stride = bitmap->row_bytes();
+  // Create an SDL surface with the same dimensions as the Ultralight bitmap
+  SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormat(0, bitmap->width(), bitmap->height(), 32, sdlPixelFormat);
+  if (!surface) {
+    // Failed to create SDL surface
+    return nullptr;
+  }
 
-  ///
-  /// Psuedo-code to upload our pixels to a GPU texture.
-  /// << ((int *)pixels)[0]
-  // std::cout << width << " " << height << " " << stride << "";
-
-  SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(pixels, width, height, 1, 1, 255, 255, 255, 255);
-  // SDL_SaveBMP(surface, "cringe.bmp");
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer->renderer, surface);
-
-  SDL_FreeSurface(surface);
-  // CopyPixelsToTexture(pixels, width, height, stride);
-
-  ///
-  /// Unlock the Bitmap when we are done.
-  ///
+  // Copy the pixel data from the Ultralight bitmap to the SDL surface
+  Uint8 *pixels = static_cast<Uint8 *>(surface->pixels);
+  const uint8_t *bitmapPixels = (uint8_t *)bitmap->LockPixels();
+  const size_t rowBytes = bitmap->row_bytes();
+  for (int y = 0; y < bitmap->height(); ++y) {
+    std::memcpy(pixels, bitmapPixels, rowBytes);
+    pixels += surface->pitch;
+    bitmapPixels += rowBytes;
+  }
   bitmap->UnlockPixels();
+
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer->renderer, surface);
   return texture;
 }
 
@@ -285,7 +275,7 @@ void RenderOneFrame() {
     surface->ClearDirtyBounds();
   }
 
-  renderer->drawTexture(texture, 100, 100);
+  renderer->drawTexture(texture, 0, 0);
 }
 
 int main() {
@@ -296,7 +286,7 @@ int main() {
 
   SDL_Init(SDL_INIT_EVERYTHING);
 
-  window = new Window("cGAY", 400, 400);
+  window = new Window("cGAY", 500, 500);
   renderer = new Renderer(window);
   resources = new Resources(renderer);
 

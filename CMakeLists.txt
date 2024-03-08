@@ -22,7 +22,7 @@ set(HEADERS
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-set(SDK_ROOT "~/cpp-libs/ultralight-arm/SDK/")
+set(SDK_ROOT "/home/neutrinozh/libs/ultralight/")
 set(ULTRALIGHT_INCLUDE_DIR "${SDK_ROOT}/include")
 set(ULTRALIGHT_BINARY_DIR "${SDK_ROOT}/bin")
 set(ULTRALIGHT_INSPECTOR_DIR "${SDK_ROOT}/inspector")
@@ -37,8 +37,5 @@ include_directories(./include)
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
-
-find_package(fmt REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 
 message("Building with CMake version: ${CMAKE_VERSION}")
